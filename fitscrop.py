@@ -48,6 +48,11 @@ if __name__ == '__main__':
                     fits_image = f[args.hdu].data
                     ## do the cropping
                     f[args.hdu].data = fitscrop(fits_image, (args.left, args.right, args.top, args.bottom))
+                    ## write to output file
+                    try:
+                        f.writeto(args.outputfile)
+                    except:
+                        sys.stderr.write("Error: cannot write to output file.\n")
                 else:
                     sys.stderr.write("Error: image has wrong dimensions. (NAXIS = " + str(fits_header['naxis']) + ")\n")
             ## close input fits file
