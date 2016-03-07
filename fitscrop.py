@@ -4,15 +4,26 @@
 import sys
 import os
 import argparse
+from astropy import wcs
 from astropy.io import fits
 ## or
 #import pyfits as fits
 
 
+def convert_coordinates_to_pix(coordinate_format, fits_header, (left, right, top, bottom)):
+    if (coordinate_format == "pixel"):
+        return (left, right, top, bottom)
+    if (coordinate_format == "degree"):
+        w = wcs.WCS(fits_header)
+        boundaries = [[left, top], [right, bottom]]
+        [[pix_left, pix_top], [pix_right, pix_bottom]] = w.wcs_world2pix([[left, top], [right, bottom]] , 1)
+        return (pix_left, pix_right, pix_top, pix_bottom)
+
 def fitscrop(fits_image, (left, right, top, bottom)):
     if (left < 0.0 or len(fits_image[0]) < right or top < 0.0 or len(fits_image[1]) < bottom):
         sys.stderr.write("Warning: image coordinates out of boundary. Returning empty FITS image.\n")
-    return fits_image[left:right, top:bottom]
+    return fits_image[int(bottom):int(top), int(left):int(right)]
+
 
 
 if __name__ == '__main__':
@@ -28,6 +39,7 @@ if __name__ == '__main__':
     parser.add_argument("-t", "--top", type=float, required=True, help="Top boundary coordinate for cropping.")
     parser.add_argument("-b", "--bottom", type=float, required=True, help="Bottom boundary coordinate for cropping.")
     args = parser.parse_args()    
+
 
     ## Check for output directory existence
     if not os.path.exists(os.path.dirname(args.outputfile)):
@@ -47,7 +59,7 @@ if __name__ == '__main__':
                     ## read fits image
                     fits_image = f[args.hdu].data
                     ## do the cropping
-                    f[args.hdu].data = fitscrop(fits_image, (args.left, args.right, args.top, args.bottom))
+                    f[args.hdu].data = fitscrop(fits_image, convert_coordinates_to_pix(args.coordinate_format, fits_header, (args.left, args.right, args.top, args.bottom)))
                     ## write to output file
                     try:
                         f.writeto(args.outputfile)
