@@ -9,6 +9,10 @@ from astropy.io import fits
 #import pyfits as fits
 
 
+def fitscrop(fits_image, (left, right, top, bottom)):
+    if (left < 0.0 or len(fits_image[0]) < right or top < 0.0 or len(fits_image[1]) < bottom):
+        sys.stderr.write("Warning: image coordinates out of boundary. Returning empty FITS image.\n")
+    return fits_image[left:right, top:bottom]
 
 
 if __name__ == '__main__':
@@ -42,9 +46,10 @@ if __name__ == '__main__':
                 if (fits_header['naxis'] == 2):
                     ## read fits image
                     fits_image = f[args.hdu].data
+                    ## do the cropping
+                    f[args.hdu].data = fitscrop(fits_image, (args.left, args.right, args.top, args.bottom))
                 else:
                     sys.stderr.write("Error: image has wrong dimensions. (NAXIS = " + str(fits_header['naxis']) + ")\n")
-                
             ## close input fits file
             f.close()
         except:
