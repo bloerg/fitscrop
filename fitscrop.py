@@ -32,6 +32,10 @@ if __name__ == '__main__':
         try:
             ## open input fits file
             f = fits.open(args.inputfile)
+            if ( len(f) < args.hdu + 1 ):
+                sys.stderr.write("Error: HDU Parameter out of boundary. Input FITS file has only " + str(len(f)) + " HDU(s).\n")
+            else:
+                fits_header = f[args.hdu]
             
             ## close input fits file
             f.close()
