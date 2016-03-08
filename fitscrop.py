@@ -71,10 +71,12 @@ if __name__ == '__main__':
                 if (fits_header['naxis'] == 2):
                     ## read fits image
                     fits_image = f[args.hdu].data
-
                     pixel_coordinates = convert_coordinates_to_pix(args.coordinate_format, fits_header, (args_left, args_right, args_top, args_bottom))
                     ## do the cropping
                     f[args.hdu].data = fitscrop(fits_image, pixel_coordinates)
+                    ## correct the header
+                    f[args.hdu].header['CRPIX1'] = f[args.hdu].header['CRPIX1'] - pixel_coordinates[0]
+                    f[args.hdu].header['CRPIX2'] = f[args.hdu].header['CRPIX2'] - pixel_coordinates[3]
                     ## write to output file
                     try:
                         f.writeto(args.outputfile)
