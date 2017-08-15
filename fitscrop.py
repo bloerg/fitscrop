@@ -60,7 +60,7 @@ if __name__ == '__main__':
     else:
         try:
             ## open input fits file
-            f = fits.open(args.inputfile)
+            f = fits.open(args.inputfile, memmap=True, mode='denywrite')
             ## stop processing if hdu parameter is out of boundary
             if ( len(f) < args.hdu + 1 ):
                 sys.stderr.write("Error: HDU Parameter out of boundary. Input FITS file has only " + str(len(f)) + " HDU(s).\n")
